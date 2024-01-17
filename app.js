@@ -1,89 +1,112 @@
-const strikeButton = document.getElementById("strike");
-const resetButton = document.getElementById("reset");
-const $team1Score = document.getElementById("score-team1");
-const $team1Wickets = document.getElementById("wickets-team1");
-const $team2Score = document.getElementById("score-team2");
-const $team2Wickets = document.getElementById("wickets-team2");
+var strike=document.getElementById('strike')
 
-const strikeAudio = new Audio("http://bit.ly/so-ball-hit");
-const gameOverAudio = new Audio("http://bit.ly/so-crowd-cheer");
+var reset=document.getElementById('reset')
 
-var team1Score = 0;
-var team1Wickets = 0;
-var team2Score = 0;
-var team2Wickets = 0;
-var team1BallsFaced = 0;
-var team2BallsFaced = 0;
-var turn = 1;
+var scoreTeam1=document.getElementById('score-team1')
+var scoreTeam2=document.getElementById('score-team2')
 
-const possibleOutcomes = [0, 1, 2, 3, 4, 6, "W"];
+var wicketTeam1=document.getElementById('wickets-team1')
+var wicketTeam2=document.getElementById('wickets-team2')
+
+reset.addEventListener('click',()=>{
+    resetFn()
+})
+var runs= [0, 1, 2, 3, 4, 6, 'W']
+
+var sum1=0;
+var sum2=0;
+var wicketSum1=0;
+var wicketSum2=0;
+var noOfBalls1=0;
+var noOfBalls2=0;
+
+var turns = 1;
+
+strike.addEventListener('click',createAndAppendScore);
+
+function createAndAppendScore(){
+    let runs = randomNess()
+    if(turns == 2 ){
+        noOfBalls2=noOfBalls2+1;
+        scoreUpdate2(runs,noOfBalls2);
+        if(runs!== 'W'){
+            sum2= sum2 + runs;
+            scoreTeam2.innerHTML = '';
+            scoreTeam2.innerText = sum2;
+        } else{
+            wicketSum2 = wicketSum2 + 1;
+            wicketTeam2.innerHTML = '';
+            wicketTeam2.innerText = wicketSum2;
+        }
+
+        if(sum2 > sum1 || noOfBalls2 == 6 || wicketSum2 == 2){
+            turns = 3;
+            setTimeout(()=>{
+                gameOver()
+            }, 20);
+        }
+    }
+
+    if(turns == 1 ){
+        noOfBalls1 = noOfBalls1 + 1;
+        scoreUpdate1(runs , noOfBalls1 );
+        if(runs!== 'W'){
+            sum1 = sum1 + runs;
+            scoreTeam1.innerHTML = '';
+            scoreTeam1.innerText = sum1;
+        } else{
+            wicketSum1 = wicketSum1 + 1;
+            wicketTeam1.innerHTML = '';
+            wicketTeam1.innerText = wicketSum1;
+        }
+
+        if(sum2 > sum1 || noOfBalls1 == 6 || wicketSum1 == 2){
+            turns = 2;
+        }
+    }
+}
+
+function randomNess(){
+    var randomNess = Math.random();
+
+    var valueInArray = randomNess * runs.length;
+
+    var roundingOfValue = Math.floor(valueInArray);
+
+    return runs[roundingOfValue];
+}
 
 function gameOver() {
-  gameOverAudio.play();
-  if (team1Score > team2Score) alert("IND wins");
-  if (team2Score > team1Score) alert("PAK wins");
-  if (team2Score === team1Score) alert("It is another superover!");
-}
-
-function updateScore() {
-  $team1Score.textContent = team1Score;
-  $team1Wickets.textContent = team1Wickets;
-  $team2Score.textContent = team2Score;
-  $team2Wickets.textContent = team2Wickets;
-}
-
-resetButton.onclick = () => {
-  window.location.reload();
-};
-
-strikeButton.onclick = () => {
-  //play audio
-  strikeAudio.pause();
-  strikeAudio.currentTime = 0;
-  strikeAudio.play();
-
-  //generate random strike value
-  const randomElement =
-    possibleOutcomes[Math.floor(Math.random() * possibleOutcomes.length)];
-
-  //second batting
-  if (turn === 2) {
-    //increase ball count
-    team2BallsFaced++;
-    //update score for the ball
-    document.querySelector(
-      `#team2-superover div:nth-child(${team2BallsFaced})`
-    ).textContent = randomElement;
-    // if wicket, update wickets variable
-    if (randomElement === "W") {
-      team2Wickets++;
-    }
-    // else update score
-    else {
-      team2Score += randomElement;
-    }
-    // Game over condition
-    if (
-      team2BallsFaced === 6 ||
-      team2Wickets === 2 ||
-      team2Score > team1Score
-    ) {
-      turn = 3;
-      gameOver();
-    }
-  }
-
-  if (turn === 1) {
-    team1BallsFaced++;
-    document.querySelector(
-      `#team1-superover div:nth-child(${team1BallsFaced})`
-    ).textContent = randomElement;
-    if (randomElement === "W") {
-      team1Wickets++;
+    if (sum1 > sum2){
+        alert('India Wins')
+        window.location.reload()
+    } else if (sum1 < sum2) {
+        alert('Pakistan Wins')
+        window.location.reload()
     } else {
-      team1Score += randomElement;
+        alert('Match is Draw')
+        window.location.reload()
     }
-    if (team1BallsFaced === 6 || team1Wickets === 2) turn = 2;
-  }
-  updateScore();
-};
+}
+
+function scoreUpdate1(runs, noOfBalls1) {
+    var p = document.createElement('p');
+    p.innerHTML = runs;
+    var ball = document.querySelector(
+        `#team1-superover>.ball:nth-child(${noOfBalls1})`
+    )
+    ball.appendChild(p);
+}
+
+function scoreUpdate2(runs, noOfBalls2) {
+    var p = document.createElement('p');
+    p.innerHTML = runs;
+    var ball = document.querySelector(
+        `#team2-superover>.ball:nth-child(${noOfBalls2})`
+    )
+    ball.appendChild(p);
+}
+
+function resetFn() {
+    return window.location.reload();
+}
